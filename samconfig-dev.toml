@@ -1,5 +1,5 @@
 version=0.1
 [develop.deploy.parameters]
 capabilities = "CAPABILITY_IAM"
-parameter_overrides = "Env=\"dev\" BucketLanding=\"landing-koandina-dev\" AwsRequestLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:request-python:1\" RequestLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:request-py:2\" RoleDatalake=\"arn:aws:iam::682033497219:role/Skycop-crossAcc-lambdaFunctionRole\" Region=\"us-east-1\" KeyLanding=\"PARTITION_UPDATE/\" KeyLandingEquipo=\"WITHOUT_PARTITION_OVERWRITE/skycop_equipo_py_externa.csv\" SkycopApiToken=\"%DEVELOP_SKYCOP_TOKEN%\" AwsWranglerLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:aws-wrangler:1\" NumberAccount=\"682033497219\""
+parameter_overrides = "Env=\"dev\" BucketLanding=\"landing-koandina-dev\" AwsRequestLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:request-python:1\" RequestLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:request-py:1\" RoleDatalake=\"arn:aws:iam::682033497219:role/Skycop-crossAcc-lambdaFunctionRole\" Region=\"us-east-1\" KeyLanding=\"PARTITION_UPDATE/\" KeyLandingEquipo=\"WITHOUT_PARTITION_OVERWRITE/skycop_equipo_py_externa.csv\" SkycopApiToken=\"%DEVELOP_SKYCOP_TOKEN%\" AwsWranglerLayer=\"arn:aws:lambda:us-east-1:682033497219:layer:aws-wrangler:1\" NumberAccount=\"682033497219\""
 
