@@ -72,7 +72,6 @@ jobs:
         if: contains(github.event.pull_request.title, '-s3') || contains(github.event.pull_request.title, '-all')
         run: |
           SAM_CLI_TELEMETRY=0 sam package \
-            --s3-bucket ${DEVELOP_ARTIFACTS_BUCKET} \
             --region ${AWS_REGION} \
             --force-upload \
             --output-template-file ${DEVELOP_STACK_NAME}-dev.yaml
@@ -87,7 +86,6 @@ jobs:
             --stack-name ${DEVELOP_STACK_NAME}-$ENVIRONMENT \
             --template ${DEVELOP_STACK_NAME}-$ENVIRONMENT.yaml \
             --region ${AWS_REGION} \
-            --s3-bucket ${DEVELOP_ARTIFACTS_BUCKET} \
             --no-fail-on-empty-changeset \
             --capabilities CAPABILITY_IAM
 
