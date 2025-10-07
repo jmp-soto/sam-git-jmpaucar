@@ -57,7 +57,7 @@ jobs:
       - name: Build SAM App
         run: SAM_CLI_TELEMETRY=0 sam build --template ${SAM_TEMPLATE} --use-container
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials.
         id: creds
         uses: aws-actions/configure-aws-credentials@v3
         with:
