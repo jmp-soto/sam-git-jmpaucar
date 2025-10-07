@@ -34,7 +34,7 @@ Parameters:
 
   SecretName:
     Type: String
-    Default: ${Env}/skycop/tokens
+    Default: ${Env}/skycop/token
     Description: Name of the secret to use
 
   RoleDatalake:
