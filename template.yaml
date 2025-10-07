@@ -1,0 +1,487 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Skycop
+Globals:
+  Function:
+    Timeout: 30
+
+Parameters:
+
+  Env:
+    Type: String
+    Description: "Ambiente Despliegue "
+  
+  Region:
+    Type: String
+    Default: us-east-1
+    Description: AWS region
+
+  BucketLanding:
+    Type: String
+    Description: "Bucket que almacena data desde la api Skycop"
+
+  KeyLandingEquipo:
+    Type: String
+    Description: S3 object key
+
+  KeyLanding:
+    Type: String
+    Description: S3 object key
+
+  SkycopApiToken:
+    Type: String
+    Description: "Token para conexión a api Skycop"
+
+  SecretName:
+    Type: String
+    Default: ${Env}/skycop/token
+    Description: Name of the secret to use
+
+  RoleDatalake:
+    Type: String
+    Description: "Rol con permisos de escritura en el datalake"
+
+  NumberAccount:
+    Type: String
+    Description: "Número de cuenta de despliege"
+
+  AwsWranglerLayer:
+    Type: String
+    Description: "AwsWranglerLayer"
+
+  RequestLayer:
+    Type: String
+    Description: "RequestLayer"
+
+  AwsRequestLayer:
+    Type: String
+    Description: "AwsRequestLayer"
+
+
+
+Resources:
+
+  StateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: states.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+      - PolicyName: Lambda
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: "lambda:InvokeFunction"
+              Resource: "*"
+      - PolicyName: cloudwatchAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 
+                - logs:CreateLogDelivery
+                - logs:GetLogDelivery
+                - logs:UpdateLogDelivery
+                - logs:DeleteLogDelivery
+                - logs:ListLogDeliveries
+                - logs:PutResourcePolicy
+                - logs:DescribeResourcePolicies
+                - logs:DescribeLogGroups
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+ 
+  SkycopStateMachine:
+    Type: AWS::Serverless::StateMachine 
+    Properties: 
+      Name: skycop-api 
+      DefinitionUri: state-machines/skycop-statemachine.json 
+      DefinitionSubstitutions: 
+        SkycopEquipoFunctionArn: !GetAtt SkycopEquipoFunction.Arn
+        SkycopAceleracionesFunctionArn: !GetAtt SkycopAceleracionesFunction.Arn
+        SkycopRecorridoArn: !GetAtt SkycopRecorridoFunction.Arn
+        SkycopExcesosArn: !GetAtt SkycopExcesosFunction.Arn
+        #SkycopGastosFunctionArn: !GetAtt SkycopGastosFunction.Arn
+        SkycopDistanciasFunctionArn: !GetAtt SkycopDistanciasFunction.Arn
+        #SkycopRecargaCombustibleFunctionArn: !GetAtt SkycopRecargaCombustibleFunction.Arn
+        #SkycopConsumoCombustibleFunctionArn: !GetAtt SkycopConsumoCombustibleFunction.Arn
+      Role: !GetAtt StateMachineRole.Arn 
+
+#  SkycopStateMachine:
+#    Type: AWS::Serverless::StateMachine 
+#    Properties: 
+#      Name: skycop-api 
+#      DefinitionUri: state-machines/skycop-equipo-statemachine.json 
+#      DefinitionSubstitutions: 
+#        SkycopEquipoFunctionArn: !GetAtt SkycopEquipoFunction.Arn
+#      Role: !GetAtt StateMachineRole.Arn 
+  
+  
+  StateMachineStartExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17' 
+        Statement: 
+        - Effect: Allow 
+          Principal: 
+            Service: events.amazonaws.com 
+          Action: 'sts:AssumeRole'    
+      Policies: 
+      - PolicyName: EventAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 
+                - states:StartExecution
+              Resource: '*'
+    
+  LambdaFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies: 
+      - PolicyName: s3Access
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 
+                - s3:ListBucket
+                - s3:GetObject
+                - s3:PutObject
+                - s3:GetBucketLocation
+                - s3:ListBucketMultipartUploads
+                - s3:ListMultipartUploadParts
+                - s3:AbortMultipartUpload
+                - s3:CreateBucket
+              Resource: '*'
+      - PolicyName: cloudwatchAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - logs:CreateLogDelivery
+                - logs:GetLogDelivery
+                - logs:UpdateLogDelivery
+                - logs:DeleteLogDelivery
+                - logs:ListLogDeliveries
+                - logs:PutResourcePolicy
+                - logs:DescribeResourcePolicies
+                - logs:DescribeLogGroups
+                - logs:CreateLogGroup
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+              Resource: '*'
+      - PolicyName: sesAccess
+        PolicyDocument:
+          Statement:
+            - Effect: "Allow"
+              Action: 
+                - "ses:SendEmail"
+                - "ses:SendRawEmail"
+                - "ses:SendTemplatedEmail"
+              Resource: "*"
+      - PolicyName: athenaAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: "athena:*"
+              Resource: '*'
+      - PolicyName: glueAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: "glue:*"
+              Resource: "*"
+      - PolicyName: dynamodbAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 
+                - dynamodb:BatchGetItem
+                - dynamodb:GetItem
+                - dynamodb:Query
+                - dynamodb:Scan
+                - dynamodb:BatchWriteItem
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:DescribeTable
+              Resource: '*'
+      - PolicyName: secretManagerAccess
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action: 
+                - secretsmanager:GetSecretValue
+              Resource: !Ref SkycopApiSecret
+      - PolicyName: AllowCopyToDLS3SkyCop
+        PolicyDocument:
+          Statement:
+            - Sid: AllowtoCopyS3
+              Effect: Allow
+              Action: s3:GetObject
+              Resource: 
+                - arn:aws:s3:::skycop*/*
+
+            - Sid: CrossAccBucketToCopy
+              Effect: Allow
+              Action:
+                - s3:*
+              Resource:
+                - arn:aws:s3:::skycop*/*
+                - arn:aws:s3:::landing-koandina-${Env}/PARTITION_UPDATE/*
+                - arn:aws:s3:::landing-koandina-${Env}/WITHOUT_PARTITION_OVERWRITE/*
+
+            - Sid: AllowKMS
+              Effect: Allow
+              Action:
+                - kms:ListKeys
+                - kms:GenerateDataKey
+                - kms:Decrypt
+                - kms:Encrypt
+                - kms:ListAliases
+              Resource: "*"
+
+  SkycopApiSecret: 
+    Type: 'AWS::SecretsManager::Secret' 
+    Properties: 
+      Name: !Sub "${Env}/skycop/api-token"
+      Description: Credenciales para conexión a la API SKYCOP 
+      SecretString: !Sub '{"token":"${SkycopApiToken}"}'
+
+  SkycopApiConsumerRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: SkycopApiConsumer
+      ScheduleExpression: "cron(0 7 ? * * *)"
+      State: ENABLED
+      Targets:
+      - Arn: !GetAtt SkycopStateMachine.Arn
+        Id: !GetAtt SkycopStateMachine.Name
+        RoleArn: !GetAtt StateMachineStartExecutionRole.Arn
+
+  RequestLayerOld:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: skycop-layer
+      Description: "Layer que incluye archivos y librerías compartidas para Skycop"
+      ContentUri: "layers/request-layer"
+      CompatibleRuntimes:
+        - python3.8
+        - python3.9
+      CompatibleArchitectures:
+        - x86_64
+
+  SkycopEquipoFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_equipo 
+      Description: Extrae datos de los equipos de toda la flota
+      CodeUri: functions/skycop_equipo/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment:
+        Variables:
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+          REGION: !Ref Region
+          KEY: !Ref KeyLandingEquipo
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !Ref RoleDatalake
+
+  SkycopDistanciasFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_distancias 
+      Description: Extrae datos de las distancias recorridas por cada equipo por día
+      CodeUri: functions/skycop_distancias/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables:
+          BUCKET: !Ref BucketLanding  
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+          SECRET_NAME: !Ref SecretName
+          REGION: !Ref Region
+          KEY: !Ref KeyLanding
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !Ref RoleDatalake
+
+  SkycopAceleracionesFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_aceleraciones
+      Description: Extrae datos de las aceleraciones de los equipos en movimiento
+      CodeUri: functions/skycop_aceleraciones/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+          SECRET_NAME: !Ref SecretName
+          REGION: !Ref Region
+          KEY: !Ref KeyLanding 
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !Ref RoleDatalake
+
+  SkycopRecorridoFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_recorrido
+      Description: Extrae datos del recorrido de los equipos
+      CodeUri: functions/skycop_recorrido/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          BUCKET: !Ref BucketLanding  
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+          SECRET_NAME: !Ref SecretName
+          REGION: !Ref Region
+          KEY: !Ref KeyLanding
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !Ref RoleDatalake
+
+  SkycopExcesosFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_excesos 
+      Description: Extrae los excesos de velocidad registrados de toda la flota
+      CodeUri: functions/skycop_excesos/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+          SECRET_NAME: !Ref SecretName
+          REGION: !Ref Region
+          KEY: !Ref KeyLanding
+
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !Ref RoleDatalake
+
+  SkycopGastosFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_gastos 
+      Description: Extrae los gastos registrados de toda la flota
+      CodeUri: functions/skycop_gastos/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          SECRET_KEY: !Ref SkycopApiSecret
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !GetAtt LambdaFunctionRole.Arn
+
+  SkycopRecargaCombustibleFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_recarga_combustible 
+      Description: Extrae los datos registrados de recarga de combustible de toda la flota
+      CodeUri: functions/skycop_recarga_combustible/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          SECRET_KEY: !Ref SkycopApiSecret
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret 
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !GetAtt LambdaFunctionRole.Arn
+
+  SkycopConsumoCombustibleFunction: 
+    Type: AWS::Serverless::Function 
+    Properties: 
+      FunctionName: skycop_consumo_combustible 
+      Description: Extrae los datos registrados de consumo de combustible de toda la flota
+      CodeUri: functions/skycop_consumo_combustible/
+      Handler: lambda_function.lambda_handler 
+      Runtime: python3.9 
+      Timeout: 900
+      MemorySize: 10240 
+      Architectures: 
+        - x86_64 
+      Environment: 
+        Variables: 
+          SECRET_KEY: !Ref SkycopApiSecret
+          BUCKET: !Ref BucketLanding 
+          ENV_INGESTA: !Ref Env
+          SKYCOP_TOKEN_SECRET_NAME: !Ref SkycopApiSecret 
+      Layers:  
+        - !Ref AwsRequestLayer
+        - !Ref AwsWranglerLayer
+        - !Ref RequestLayer
+      Role: !GetAtt LambdaFunctionRole.Arn
+
+

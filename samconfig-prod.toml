@@ -1,0 +1,6 @@
+version=0.1
+[prod.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Env=\"prod\" BucketLanding=\"landing-koandina-prod\" AwsRequestLayer=\"arn:aws:lambda:us-east-1:229218107341:layer:request-layer:1\" RequestLayer=\"arn:aws:lambda:us-east-1:229218107341:layer:requests-new:1\" SkycopApiToken=\"%PROD_SKYCOP_TOKEN%\" KeyLanding=\"PARTITION_UPDATE/\" KeyLandingEquipo=\"WITHOUT_PARTITION_OVERWRITE/skycop_equipo_py_externa.csv\" RoleDatalake=\"arn:aws:iam::229218107341:role/Skycop-crossAcc-lambdaFunctionRole\" Region=\"us-east-1\" AwsWranglerLayer=\"arn:aws:lambda:us-east-1:229218107341:layer:WranglerLayer_38:1\" NumberAccount=\"229218107341\""
+
+

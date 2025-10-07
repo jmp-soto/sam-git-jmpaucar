@@ -1,0 +1,93 @@
+name: Develop Pipeline
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [develop, qa, prod]
+
+jobs:
+  deploy-feature:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.base_ref }}    
+
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      ENVIRONMENT: ${{ github.base_ref == 'develop' && 'dev' || github.base_ref }}
+      AWS_REGION: us-east-1
+      SAM_TEMPLATE: template.yaml
+      DEVELOP_STACK_NAME: skycop-api
+      DEVELOP_ARTIFACTS_BUCKET: bucket-athena-juanpi-dev
+      DEVELOP_SKYCOP_TOKEN: ${{ secrets.DEVELOP_SKYCOP_TOKEN }}    
+
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+
+      - name: Setup SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Define environment
+        run: |
+          if [[ "${{ github.base_ref }}" == "develop" ]]; then
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          else
+            echo "ENVIRONMENT=${{ github.base_ref }}" >> $GITHUB_ENV
+          fi
+
+      - name: Setup SAM Parameters
+        shell: bash
+        run: |
+          export DEVELOP_SKYCOP_TOKEN=$(python regex_encode.py "${DEVELOP_SKYCOP_TOKEN}")
+
+          ARCHIVO="samconfig-$ENVIRONMENT.toml"
+          if [[ ! -f "$ARCHIVO" ]]; then
+            echo "Error: No se encontró $ARCHIVO"
+            exit 1
+          fi
+
+          sed -i -e "s/%DEVELOP_SKYCOP_TOKEN%/${DEVELOP_SKYCOP_TOKEN}/g" ${ARCHIVO}
+
+      - name: Build SAM App
+        run: SAM_CLI_TELEMETRY=0 sam build --template ${SAM_TEMPLATE} --use-container
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: ${{ secrets.OIDC_ROLE }}
+          role-session-name: feature-deployment
+          aws-region: ${{ env.AWS_REGION }}
+          role-duration-seconds: 3600
+          role-skip-session-tagging: true
+  
+      
+      - name: Upload artifacts to S3 buckets
+        if: contains(github.event.pull_request.title, '-s3') || contains(github.event.pull_request.title, '-all')
+        run: |
+          SAM_CLI_TELEMETRY=0 sam package \
+            --s3-bucket ${DEVELOP_ARTIFACTS_BUCKET} \
+            --region ${AWS_REGION} \
+            --force-upload \
+            --output-template-file ${DEVELOP_STACK_NAME}-dev.yaml
+      
+      - name: Deploy to feature stack in the account
+        if: contains(github.event.pull_request.title, '-sam') || contains(github.event.pull_request.title, '-all')   
+        shell: bash
+        run: |
+          sam deploy \
+            --config-file samconfig-$ENVIRONMENT.toml \
+            --config-env develop \
+            --stack-name ${DEVELOP_STACK_NAME}-$ENVIRONMENT \
+            --template ${DEVELOP_STACK_NAME}-$ENVIRONMENT.yaml \
+            --region ${AWS_REGION} \
+            --s3-bucket ${DEVELOP_ARTIFACTS_BUCKET} \
+            --no-fail-on-empty-changeset \
+            --capabilities CAPABILITY_IAM
+

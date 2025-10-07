@@ -1,0 +1,13 @@
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=alert_status&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=sqale_rating&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=security_rating&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=bugs&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=vulnerabilities&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=duplicated_lines_density&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=reliability_rating&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=sqale_index&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=coverage&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=ncloc&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=koandina_skycop-api-infra&metric=code_smells&token=2410f8aa9ca0d28ff9d385542cb95be5e436275c)](https://sonarcloud.io/summary/new_code?id=koandina_skycop-api-infra)
+########
+  
