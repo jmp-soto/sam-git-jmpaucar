@@ -34,7 +34,7 @@ Parameters:
 
   SecretName:
     Type: String
-    Default: ${Env}/skycop/token
+    Default: ${Env}/skycop/tokens
     Description: Name of the secret to use
 
   RoleDatalake:
@@ -305,7 +305,7 @@ Resources:
         - !Ref AwsRequestLayer
         - !Ref AwsWranglerLayer
         - !Ref RequestLayer
-      Role: !Ref RoleDatalake
+      
 
   SkycopDistanciasFunction: 
     Type: AWS::Serverless::Function 
@@ -331,7 +331,7 @@ Resources:
         - !Ref AwsRequestLayer
         - !Ref AwsWranglerLayer
         - !Ref RequestLayer
-      Role: !Ref RoleDatalake
+      
 
   SkycopAceleracionesFunction: 
     Type: AWS::Serverless::Function 
@@ -357,7 +357,7 @@ Resources:
         - !Ref AwsRequestLayer
         - !Ref AwsWranglerLayer
         - !Ref RequestLayer
-      Role: !Ref RoleDatalake
+      
 
   SkycopRecorridoFunction: 
     Type: AWS::Serverless::Function 
@@ -383,7 +383,7 @@ Resources:
         - !Ref AwsRequestLayer
         - !Ref AwsWranglerLayer
         - !Ref RequestLayer
-      Role: !Ref RoleDatalake
+      
 
   SkycopExcesosFunction: 
     Type: AWS::Serverless::Function 
@@ -410,7 +410,7 @@ Resources:
         - !Ref AwsRequestLayer
         - !Ref AwsWranglerLayer
         - !Ref RequestLayer
-      Role: !Ref RoleDatalake
+      
 
   SkycopGastosFunction: 
     Type: AWS::Serverless::Function 
