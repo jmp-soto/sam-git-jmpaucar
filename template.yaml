@@ -291,7 +291,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment:
@@ -316,7 +316,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -342,7 +342,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -368,7 +368,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -394,7 +394,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -421,7 +421,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -445,7 +445,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
@@ -469,7 +469,7 @@ Resources:
       Handler: lambda_function.lambda_handler 
       Runtime: python3.9 
       Timeout: 900
-      MemorySize: 10240 
+      MemorySize: 3008 
       Architectures: 
         - x86_64 
       Environment: 
