@@ -64,7 +64,7 @@
           {
             "StartAt": "63564556456",
             "States": {
-              "skycop_distancias": {
+              "63564556456": {
                 "Type": "Task",
                 "Resource": "arn:aws:states:::lambda:invoke",
                 "OutputPath": "$.Payload",
